@@ -1,0 +1,94 @@
+---
+- hosts: all
+  sudo: yes
+  gather_facts: no
+
+  vars:
+    otrs_version: 5.0.13
+    otrs_ftp: http://ftp.otrs.org/pub/otrs/otrs-5.0.13.tar.gz
+
+  pre_tasks:
+    - name: 'Installing python2 on remote host for ansible'
+      raw: sudo apt-get -y install python-simplejson
+
+  tasks:
+    - name: 'Update system repositories'
+      apt: update_cache=yes
+
+    - name: 'Upgrade system packages'
+      command: apt-get upgrade -y
+
+    - name: 'Install packages for download and unpack archive with OTRS 5'
+      command: apt-get install tar zip wget -y
+
+    - name: 'Download latest OTRS source code'
+      shell:
+        cmd: wget {{ otrs_ftp }}
+        chdir: /tmp
+
+    - name: 'Unpack OTRS 5'
+      shell:
+        cmd: tar xzf /tmp/otrs-*.tar.gz
+        chdir: /tmp
+
+    - name: 'Remove OTRS 5 archive'
+      shell:
+        cmd: rm /tmp/otrs-*.tar.gz
+        chdir: /tmp
+
+    - name: 'Move OTRS 5 folder to /opt/otrs'
+      shell:
+        cmd: mv otrs-*/ /opt/otrs
+        chdir: /tmp
+      become: true
+
+    - name: 'Install all dependencies'
+      command: apt-get install -y libapache2-mod-perl2 libdbd-mysql-perl libtimedate-perl libnet-dns-perl libnet-ldap-perl libio-socket-ssl-perl libpdf-api2-perl libdbd-mysql-perl libsoap-lite-perl libtext-csv-xs-perl libjson-xs-perl libapache-dbi-perl libxml-libxml-perl libxml-libxslt-perl libyaml-perl libarchive-zip-perl libcrypt-eksblowfish-perl libencode-hanextra-perl libmail-imapclient-perl libtemplate-perl libcrypt-ssleay-perl libdbd-odbc-perl libdbd-pg-perl postgresql postgresql-contrib vim htop apache2
+
+    - name: 'Check Perl modules'
+      command: perl /opt/otrs/bin/otrs.CheckModules.pl
+      become: true
+      register: perl
+
+    - debug: var=perl.stdout_lines
+
+    - name: 'Create user OTRS'
+      user: name=otrs shell=/bin/bash home=/opt/otrs
+
+    - name: 'Add otrs user to www-data group'
+      command: usermod -G www-data otrs
+
+    - name: 'Copy Config.pm'
+      shell:
+        cmd: cp Kernel/Config.pm.dist Kernel/Config.pm
+        chdir: /opt/otrs
+      become: true
+
+    - name: 'Enable needed apache modules'
+      command: a2enmod perl
+    - command: a2enmod deflate
+    - command: a2enmod filter
+    - command: a2enmod headers
+
+    - name: 'Create site config for Apache'
+      shell:
+        cmd: ln -s /opt/otrs/scripts/apache2-httpd.include.conf zzz_otrs.conf
+        chdir: /etc/apache2/sites-available
+      become: true
+
+    - name: 'Enable apache site'
+      command: a2ensite zzz_otrs.conf
+
+    - name: 'Restart apache'
+      command: service apache2 restart
+
+    - name: 'Set proper permissions in /opt/otrs folder'
+      shell:
+        cmd: bin/otrs.SetPermissions.pl --web-group=www-data
+        chdir: /opt/otrs
+      become: true
+
+    - name: 'Create postgres user'
+      command: psql -c 'CREATE USER otrs WITH PASSWORD "otrs4321"; CREATE DATABASE otrs; GRANT ALL PRIVILEGES ON DATABASE otrs to otrs;'
+      become: true
+      become_user: postgres
