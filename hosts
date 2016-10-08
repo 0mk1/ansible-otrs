@@ -1,9 +1,4 @@
-[ubuntu]
 192.168.150.150
 
-[debian]
-
-[CentOS]
-
-[ubuntu:vars]
-ansible_ssh_user=ubuntu
+[all:vars]
+ansible_ssh_user=vagrant
