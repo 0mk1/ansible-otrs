@@ -1,0 +1,21 @@
+---
+- name: 'Install mysql database'
+  apt:
+    name: mysql-common,mysql-server
+  become: true
+
+- name: Ensure MySQL Python libraries are installed.
+  apt: "name=python-mysqldb state=installed"
+  become: true
+
+- name: 'Create otrs database (mysql)'
+  mysql_db: name=otrs state=present
+  become: true
+
+- name: 'Create otrs user in mysql and Grant all privilages to otrs DB for otrs user'
+  mysql_user: >
+    name=otrs
+    password={{ otrs_db_password }}
+    priv=otrs.*:ALL
+    state=present
+  become: true

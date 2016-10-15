@@ -1,0 +1,21 @@
+---
+- name: 'Create user OTRS'
+  user: name=otrs shell=/bin/bash home=/opt/otrs
+  become: true
+
+- name: 'Add otrs user to www-data group'
+  command: usermod -G www-data otrs
+  become: true
+
+- name: 'Copy Config.pm'
+  shell:
+    cmd: cp Kernel/Config.pm.dist Kernel/Config.pm
+    chdir: /opt/otrs
+  become: true
+
+- name: 'Set proper permissions in /opt/otrs folder'
+  shell:
+    cmd: bin/otrs.SetPermissions.pl --web-group=www-data
+    chdir: /opt/otrs
+  become: true
+  notify: restart apache

@@ -1,0 +1,24 @@
+---
+- name: 'Download OTRS'
+  get_url:
+    url: http://ftp.otrs.org/pub/otrs/otrs-{{ otrs_version }}.tar.gz
+    dest: /tmp
+  become: true
+
+- name: 'Unpack OTRS archive'
+  shell:
+    cmd: tar -xzf otrs-{{ otrs_version }}.tar.gz
+    chdir: /tmp
+  become: true
+
+- name: 'Remove OTRS archive'
+  file:
+    path: /tmp/otrs-{{ otrs_version }}.tar.gz
+    state: absent
+  become: true
+
+- name: 'Move OTRS 5 folder to /opt/otrs'
+  shell:
+    cmd: mv otrs-{{ otrs_version }}/ /opt/otrs
+    chdir: /tmp
+  become: true

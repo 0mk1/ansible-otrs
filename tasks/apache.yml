@@ -1,0 +1,26 @@
+---
+- name: 'Install Apache'
+  apt:
+    name: apache2
+  become: true
+
+- name: 'Enable Apache modules'
+  command: "{{ item }}"
+  with_items:
+    - a2enmod perl
+    - a2enmod deflate
+    - a2enmod filter
+    - a2enmod headers
+  become: true
+
+- name: 'Create site config for Apache'
+  file:
+    src: /opt/otrs/scripts/apache2-httpd.include.conf
+    dest: /etc/apache2/sites-available/zzz_otrs.conf
+    state: link
+  become: true
+
+- name: 'Enable apache site'
+  command: a2ensite zzz_otrs.conf
+  become: true
+  notify: restart apache

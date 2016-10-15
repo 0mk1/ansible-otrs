@@ -6,3 +6,6 @@
 
 # hosts
 hosts
+
+# retry files
+*.retry

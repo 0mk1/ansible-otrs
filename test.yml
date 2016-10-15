@@ -1,0 +1,11 @@
+---
+- hosts: all
+  remote_user: ubuntu
+  gather_facts: no
+
+  pre_tasks:
+    - name: 'Installing all dependencies on remote host for ansible'
+      raw: sudo apt-get -y install python-simplejson aptitude
+
+  roles:
+    - { role: "." }

@@ -3,16 +3,13 @@
 
 Vagrant.configure(2) do |config|
   # Ubuntu 16.04
-  # config.vm.box = "ubuntu/xenial64"
+  config.vm.box = "ubuntu/xenial64"
 
   # Ubuntu 14.04
   # config.vm.box = "ubuntu/trusty64"
 
   # Debian jessie
   # config.vm.box = "debian/jessie64"
-
-  # CentOS 7
-  config.vm.box = "centos/7"
 
   config.vm.hostname = "otrs"
   config.vm.box_check_update = false
@@ -22,5 +19,10 @@ Vagrant.configure(2) do |config|
 
   config.vm.provider "virtualbox" do |vb|
    vb.memory = "1024"
+  end
+
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "test.yml"
+    ansible.inventory_path = "inventory"
   end
 end

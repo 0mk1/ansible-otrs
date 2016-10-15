@@ -1,2 +1,4 @@
 ---
-# defaults file for otrs
+otrs_version: 5.0.13
+otrs_db: mysql
+otrs_db_password: password

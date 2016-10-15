@@ -1,0 +1,28 @@
+---
+- name: 'Install postgres database'
+  apt:
+    name: postgresql,postgresql-contrib
+  become: true
+
+- name: Ensure PostgreSQL Python libraries are installed.
+  apt: "name=python-psycopg2 state=installed"
+  become: true
+
+- name: 'Create otrs user in postgres database'
+  postgresql_user: user=otrs password={{ otrs_db_password }}
+  become: true
+  become_user: postgres
+
+- name: 'Create otrs database (postgres)'
+  postgresql_db: name=otrs
+  become: true
+  become_user: postgres
+
+- name: 'Grant all privilages to otrs DB for otrs user (postgres)'
+  postgresql_privs: >
+    db=otrs
+    privs=ALL
+    type=database
+    role=otrs
+  become: true
+  become_user: postgres
