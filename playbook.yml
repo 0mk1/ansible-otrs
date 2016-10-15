@@ -1,5 +1,8 @@
+# TODO:
+# * if dla postgres/mysql
+# * if dla centosa
 ---
-- hosts: all
+- hosts: otrs
   gather_facts: no
 
   vars:
@@ -10,6 +13,7 @@
   pre_tasks:
     - name: 'Installing all dependencies on remote host for ansible'
       raw: sudo apt-get -y install python-simplejson aptitude python-psycopg2 libpq-dev
+      # when: ansible_os_family == "Debian"
 
   tasks:
     - name: 'Upgrade and Update system repositories'
