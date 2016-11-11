@@ -1,8 +1,6 @@
 ---
 - include: update_system.yml
 
-- include: utils.yml
-
 - include: otrs_package.yml
 
 - include: perl_dependencies.yml

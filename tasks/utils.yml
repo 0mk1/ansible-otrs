@@ -1,5 +1,0 @@
----
-- name: 'Install utils'
-  apt:
-    name: vim,htop
-  become: true
