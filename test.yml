@@ -8,4 +8,4 @@
       raw: sudo apt-get -y install python-simplejson aptitude
 
   roles:
-    - { role: "." }
+    - ansible-otrs
